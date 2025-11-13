@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ATLAS - Sistema de Cálculo de Materiales</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f3f4f6;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    background-color: #1f2937;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    width: 100%;
+    font-size: 1.6em;
+    font-weight: bold;
+  }
+
+  main {
+    margin-top: 30px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #1e40af;
+  }
+
+  button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background-color: #2563eb;
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #1e3a8a;
+  }
+
+  .hidden { display: none; }
+
+  label {
+    font-weight: bold;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  .resultado {
+    background-color: #e0f2fe;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    line-height: 1.6;
+  }
+
+  footer {
+    margin-top: 40px;
+    padding: 10px;
+    color: #6b7280;
+  }
+
+  .login-box {
+    text-align: center;
+  }
+
+  .login-box img {
+    width: 100px;
+    margin-bottom: 10px;
+  }
+
+  a {
+    color: #2563eb;
+    cursor: pointer;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<header>🏗️ ATLAS - Sistema de Cálculo de Materiales</header>
+
+<main>
+  <!-- LOGIN -->
+  <section id="loginSection" class="login-box">
+    <img src="https://cdn-icons-png.flaticon.com/512/10307/10307919.png" alt="Logo ATLAS">
+    <h2>Iniciar sesión</h2>
+    <label>Usuario:</label>
+    <input type="text" id="usuario" placeholder="Ingrese su usuario">
+    <label>Contraseña:</label>
+    <input type="password" id="clave" placeholder="Ingrese su contraseña">
+    <button onclick="iniciarSesion()">Ingresar</button>
+    <p>¿No tienes cuenta? <a onclick="mostrarRegistro()">Regístrate aquí</a></p>
+    <p id="loginMensaje" style="color:red; margin-top:10px;"></p>
+  </section>
+
+  <!-- REGISTRO -->
+  <section id="registroSection" class="login-box hidden">
+    <img src="https://cdn-icons-png.flaticon.com/512/10307/10307919.png" alt="Logo ATLAS">
+    <h2>Registro de usuario</h2>
+    <label>Nuevo usuario:</label>
+    <input type="text" id="nuevoUsuario" placeholder="Elija un nombre de usuario">
+    <label>Contraseña:</label>
+    <input type="password" id="nuevaClave" placeholder="Cree una contraseña">
+    <button onclick="registrarUsuario()">Registrar</button>
+    <p><a onclick="mostrarLogin()">Volver al login</a></p>
+    <p id="registroMensaje" style="color:green; margin-top:10px;"></p>
+  </section>
+
+  <!-- MENÚ PRINCIPAL -->
+  <section id="menuPrincipal" class="hidden">
+    <h2>MENU PRINCIPAL</h2>
+    <button onclick="mostrarMenu('construccion')">1) Construcción completa</button>
+    <button onclick="mostrarMenu('remodelacion')">2) Remodelación de habitación</button>
+    <button onclick="mostrarInformeGeneral()">3) Mostrar informe general</button>
+    <button onclick="opcionMisteriosa()">4) Opción misteriosa</button>
+    <button onclick="salir()">5) Cerrar sesión</button>
+  </section>
+
+  <!-- MENÚ DE CONSTRUCCIÓN -->
+  <section id="menuConstruccion" class="hidden">
+    <h2>MENU DE CONSTRUCCIÓN</h2>
+    <button onclick="registrarObra()">1) Registrar nueva obra</button>
+    <button onclick="agregarHabitacion()">2) Agregar habitación</button>
+    <button onclick="calcularMaterialesGenerales()">3) Calcular materiales</button>
+    <button onclick="generarPresupuestoGeneral()">4) Generar presupuesto</button>
+    <button onclick="mostrarInformeObra()">5) Mostrar informe</button>
+    <button onclick="volver('menuConstruccion')">6) Volver</button>
+    <div id="construccionResultado" class="resultado hidden"></div>
+  </section>
+
+  <!-- MENÚ DE REMODELACIÓN -->
+  <section id="menuRemodelacion" class="hidden">
+    <h2>MENU DE REMODELACIÓN</h2>
+    <button onclick="remodelarHabitacion()">1) Remodelar habitación</button>
+    <button onclick="mostrarHistorial()">2) Ver historial</button>
+    <button onclick="volver('menuRemodelacion')">3) Volver</button>
+    <div id="remodelacionResultado" class="resultado hidden"></div>
+  </section>
+</main>
+
+<footer>Desarrollado por Cuello Rodrigo y Aguirre Giovanni - 2025</footer>
+
+<script>
+  let obra = { dueno: "", direccion: "", habitaciones: [], totalM2: 0, presupuesto: 0 };
+  let remodelaciones = [];
+
+  // ---- LOGIN Y REGISTRO ----
+  function mostrarRegistro() {
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("registroSection").classList.remove("hidden");
+  }
+
+  function mostrarLogin() {
+    document.getElementById("registroSection").classList.add("hidden");
+    document.getElementById("loginSection").classList.remove("hidden");
+  }
+
+  function registrarUsuario() {
+    const user = document.getElementById("nuevoUsuario").value.trim();
+    const pass = document.getElementById("nuevaClave").value.trim();
+    const mensaje = document.getElementById("registroMensaje");
+
+    if (user === "" || pass === "") {
+      mensaje.style.color = "red";
+      mensaje.textContent = "Por favor, complete todos los campos.";
+      return;
+    }
+
+    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+    if (usuarios.find(u => u.user === user)) {
+      mensaje.style.color = "red";
+      mensaje.textContent = "El usuario ya existe.";
+      return;
+    }
+
+    usuarios.push({ user, pass });
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+    mensaje.style.color = "green";
+    mensaje.textContent = "Usuario registrado correctamente ✅";
+    setTimeout(() => {
+      mostrarLogin();
+    }, 1500);
+  }
+
+  function iniciarSesion() {
+    const user = document.getElementById("usuario").value.trim();
+    const pass = document.getElementById("clave").value.trim();
+    const mensaje = document.getElementById("loginMensaje");
+
+    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+    const encontrado = usuarios.find(u => u.user === user && u.pass === pass);
+
+    if (encontrado) {
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("menuPrincipal").classList.remove("hidden");
+      mensaje.textContent = "";
+      alert(`Bienvenido ${user} 👷‍♂️`);
+    } else {
+      mensaje.textContent = "❌ Usuario o contraseña incorrectos.";
+    }
+  }
+
+  // ---- FUNCIONES DEL MENÚ ----
+  function mostrarMenu(nombre) {
+    document.getElementById("menuPrincipal").classList.add("hidden");
+    if (nombre === "construccion")
+      document.getElementById("menuConstruccion").classList.remove("hidden");
+    else if (nombre === "remodelacion")
+      document.getElementById("menuRemodelacion").classList.remove("hidden");
+  }
+
+  function volver(menu) {
+    document.getElementById(menu).classList.add("hidden");
+    document.getElementById("menuPrincipal").classList.remove("hidden");
+  }
+
+  function salir() {
+    alert("Cerrando sesión...");
+    location.reload();
+  }
+
+  // ---- FUNCIONES DE OBRA ----
+  function registrarObra() {
+    const dueno = prompt("Ingrese nombre del dueño:");
+    const direccion = prompt("Ingrese dirección de la obra:");
+    const cant = parseInt(prompt("Cantidad de habitaciones:"));
+    obra = { dueno, direccion, habitaciones: [], totalM2: 0, presupuesto: 0 };
+
+    for (let i = 0; i < cant; i++) {
+      const nombre = prompt(`Nombre de la habitación ${i+1}:`);
+      const m2 = parseFloat(prompt(`Metros cuadrados de ${nombre}:`));
+      obra.habitaciones.push({ nombre, m2 });
+      obra.totalM2 += m2;
+    }
+
+    mostrarMensaje("construccionResultado", `Obra registrada correctamente. Superficie total: ${obra.totalM2} m²`);
+  }
+
+  function agregarHabitacion() {
+    if (!obra.dueno) {
+      alert("Debe registrar una obra primero.");
+      return;
+    }
+    const nombre = prompt("Nombre de la nueva habitación:");
+    const m2 = parseFloat(prompt("Metros cuadrados:"));
+    obra.habitaciones.push({ nombre, m2 });
+    obra.totalM2 += m2;
+    mostrarMensaje("construccionResultado", `Habitación agregada correctamente.`);
+  }
+
+  function calcularMaterialesGenerales() {
+    if (obra.totalM2 <= 0) {
+      alert("No hay obra registrada.");
+      return;
+    }
+    const cemento = (obra.totalM2 * 0.55).toFixed(2);
+    const arena = (obra.totalM2 * 0.03).toFixed(2);
+    const ladrillos = (obra.totalM2 * 45).toFixed(0);
+    const hierro = (obra.totalM2 * 2.5).toFixed(2);
+
+    mostrarMensaje("construccionResultado",
+      `Materiales estimados:<br>
+      Cemento: ${cemento} bolsas<br>
+      Arena: ${arena} m³<br>
+      Ladrillos: ${ladrillos} unidades<br>
+      Hierro: ${hierro} kg`);
+  }
+
+  function generarPresupuestoGeneral() {
+    if (obra.totalM2 === 0) {
+      alert("Debe registrar una obra primero.");
+      return;
+    }
+    const precioCemento = 5800, precioArena = 12000, precioLadrillo = 120, precioHierro = 2000;
+    const cemento = obra.totalM2 * 0.55;
+    const arena = obra.totalM2 * 0.03;
+    const ladrillos = obra.totalM2 * 45;
+    const hierro = obra.totalM2 * 2.5;
+    const manoObra = obra.totalM2 * 1500;
+    obra.presupuesto = cemento * precioCemento + arena * precioArena + ladrillos * precioLadrillo + hierro * precioHierro + manoObra;
+
+    mostrarMensaje("construccionResultado", `Presupuesto estimado: $${obra.presupuesto.toFixed(2)}`);
+  }
+
+  function mostrarInformeObra() {
+    if (!obra.dueno) {
+      alert("No hay obra registrada.");
+      return;
+    }
+    let texto = `
+      <b>Dueño:</b> ${obra.dueno}<br>
+      <b>Dirección:</b> ${obra.direccion}<br>
+      <b>Habitaciones:</b> ${obra.habitaciones.length}<br>
+      <b>Superficie total:</b> ${obra.totalM2} m²<br>
+      <b>Presupuesto total:</b> $${obra.presupuesto.toFixed(2)}
+    `;
+    mostrarMensaje("construccionResultado", texto);
+  }
+
+  // ---- FUNCIONES DE REMODELACIÓN ----
+  function remodelarHabitacion() {
+    const nombre = prompt("Ingrese nombre de la habitación a remodelar:");
+    const m2 = parseFloat(prompt("Metros cuadrados:"));
+    const tarea = prompt("Tipo: pared / contrapiso / revoque / ceramico");
+
+    let resultado = "";
+    switch (tarea) {
+      case "pared":
+        resultado = `Cal: ${(2.0*m2).toFixed(2)} kg<br>Cemento: ${(2.1*m2).toFixed(2)} kg<br>Arena: ${(0.010*m2).toFixed(3)} m³<br>Ladrillos: ${(30*m2).toFixed(0)} unidades`;
+        break;
+      case "contrapiso":
+        resultado = `Cemento: ${(5*m2).toFixed(2)} kg<br>Arena: ${(0.05*m2).toFixed(3)} m³<br>Piedra: ${(0.05*m2).toFixed(3)} m³<br>Agua: ${(0.02*m2).toFixed(3)} m³`;
+        break;
+      case "revoque":
+        resultado = `Cal: ${(1.5*m2).toFixed(2)} kg<br>Cemento: ${(1.2*m2).toFixed(2)} kg<br>Arena: ${(0.015*m2).toFixed(3)} m³`;
+        break;
+      case "ceramico":
+        resultado = `Cemento: ${(1.2*m2).toFixed(2)} kg<br>Arena: ${(0.02*m2).toFixed(3)} m³<br>Pastina: ${(0.25*m2).toFixed(2)} kg<br>Cerámicos: ${(11*m2).toFixed(0)} unidades`;
+        break;
+      default:
+        alert("Tarea no válida.");
+        return;
+    }
+
+    remodelaciones.push({ nombre, tarea, m2 });
+    mostrarMensaje("remodelacionResultado", `Materiales para ${tarea} (${nombre}, ${m2} m²):<br>${resultado}`);
+  }
+
+  function mostrarHistorial() {
+    if (remodelaciones.length === 0) {
+      mostrarMensaje("remodelacionResultado", "No hay remodelaciones registradas.");
+      return;
+    }
+    let texto = "<b>Historial de remodelaciones:</b><br>";
+    remodelaciones.forEach(r => texto += `- ${r.nombre}: ${r.tarea} (${r.m2} m²)<br>`);
+    mostrarMensaje("remodelacionResultado", texto);
+  }
+
+  // ---- INFORME GENERAL ----
+  function mostrarInformeGeneral() {
+    let texto = "<h3>INFORME GENERAL</h3>";
+    if (!obra.dueno) texto += "No hay obra registrada.<br>";
+    else texto += `Dueño: ${obra.dueno} - Total: ${obra.totalM2} m²<br>Presupuesto: $${obra.presupuesto.toFixed(2)}<br>`;
+    if (remodelaciones.length > 0) {
+      texto += "<br><b>Remodelaciones:</b><br>";
+      remodelaciones.forEach(r => texto += `- ${r.nombre}: ${r.tarea} (${r.m2} m²)<br>`);
+    }
+    alert(texto.replace(/<br>/g, '\n'));
+  }
+
+  // ---- OPCIÓN MISTERIOSA ----
+  function opcionMisteriosa() {
+    alert("Activando opción misteriosa 😎\n¡Gracias por usar ATLAS!");
+    window.open("https://media.gifdb.com/club-penguin-dance-498-x-482-gif-h3lfivljvn860gsw.gif", "_blank");
+  }
+
+  function mostrarMensaje(id, texto) {
+    const div = document.getElementById(id);
+    div.innerHTML = texto;
+    div.classList.remove("hidden");
+  }
+</script>
+
+</body>
+</html>
